@@ -6,6 +6,8 @@ export class Supplier {
   ) {
     if (!Supplier.isValidEmail(contactEmail))
       throw new Error("Not a valid email address");
+
+    if (!Supplier.isValidName(name)) throw new Error("Not a valid name");
   }
 
   public getSupplierDetails(): string {
@@ -22,5 +24,10 @@ export class Supplier {
   public static isValidEmail(email: string): boolean {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(email);
+  }
+
+  public static isValidName(name: string): boolean {
+    const validName = /^[a-zA-Z0-9\s&.,'()\-]{2,50}$/.test(name.trim());
+    return validName;
   }
 }

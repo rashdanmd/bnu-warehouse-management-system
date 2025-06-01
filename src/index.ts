@@ -1,6 +1,9 @@
 import inquirer from "inquirer";
 
-import { ExitHandler } from "./handlers/ExitHandler";
+import { SupplierHandler, ExitHandler } from "./handlers";
+import { SupplierService } from "./services/SupplierService";
+
+const supplierService = new SupplierService();
 
 const App = async () => {
   const welcomeMessage =
@@ -16,6 +19,10 @@ const App = async () => {
   });
 
   switch (action) {
+    case "Manage Suppliers":
+      await new SupplierHandler(supplierService).showSupplierMenu();
+      return App();
+
     case "Exit":
       const exitConfirmed = await new ExitHandler().confirmExit();
       if (!exitConfirmed) return App();

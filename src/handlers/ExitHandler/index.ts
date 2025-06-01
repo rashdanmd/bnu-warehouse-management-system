@@ -12,7 +12,7 @@ export class ExitHandler {
       await inquirer.prompt({
         name: "goodbye",
         type: "input",
-        message: "\n👋 Goodbye!!!!! Press Enter to close the app.",
+        message: "\n👋 Goodbye! Press Enter to close the app.",
       });
       process.exit(0);
     }

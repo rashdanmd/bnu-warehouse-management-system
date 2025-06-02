@@ -6,21 +6,26 @@ import {
   InventoryHandler,
   CustomerOrderHandler,
   ExitHandler,
+  FinanceHandler,
 } from "./handlers";
 import {
   SupplierService,
   PurchaseOrderService,
   InventoryService,
   CustomerOrderService,
+  FinanceService,
 } from "./services";
+import { b } from "vitest/dist/chunks/suite.d.FvehnV49";
 
 const supplierService = new SupplierService();
 const purchaseOrderService = new PurchaseOrderService();
 const inventoryService = new InventoryService();
 const customerOrderService = new CustomerOrderService(inventoryService);
+const financeService = new FinanceService();
 
 const supplierHandler = new SupplierHandler(supplierService);
 const inventoryHandler = new InventoryHandler(inventoryService);
+const financeHandler = new FinanceHandler(financeService);
 const purchaseHandler = new PurchaseOrderHandler(
   purchaseOrderService,
   supplierService,
@@ -43,6 +48,7 @@ const App = async () => {
       { name: "💳 Manage Purchase Orders", value: "managePurchaseOrders" },
       { name: "📊 Manage Inventory", value: "manageInventory" },
       { name: "🧾 Manage Customer Orders", value: "manageCustomerOrders" },
+      { name: "💰 Finance", value: "finance" },
       { name: "🚪 Exit", value: "exit" },
     ],
   });
@@ -67,6 +73,10 @@ const App = async () => {
     case "exit":
       const confirmed = await exitHandler.confirmExit();
       if (!confirmed) return App();
+      break;
+
+    case "finance":
+      await financeHandler.showFinanceMenu();
       break;
 
     default:

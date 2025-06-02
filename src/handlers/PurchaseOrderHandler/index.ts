@@ -1,11 +1,16 @@
 import inquirer from "inquirer";
 import { PurchaseItem, PurchaseOrder } from "../../models";
-import { SupplierService, PurchaseOrderService } from "../../services";
+import {
+  SupplierService,
+  PurchaseOrderService,
+  InventoryService,
+} from "../../services";
 
 export class PurchaseOrderHandler {
   constructor(
     private purchaseOrderService: PurchaseOrderService,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    private inventoryService: InventoryService
   ) {}
 
   public async showPurchaseOrderMenu(): Promise<void> {
@@ -84,41 +89,47 @@ export class PurchaseOrderHandler {
     let addMore = true;
 
     while (addMore) {
-      const { productName, quantity, unitPrice } = await inquirer.prompt([
-        {
-          name: "productName",
-          type: "input",
-          message: "Enter product name:",
-          validate: (value: string) => {
-            if (!value || value.trim().length === 0) {
-              return "Please enter a product name.";
-            }
-            if (value.trim().length < 2) {
-              return "Product name must be at least 2 characters.";
-            }
-            if (value.length > 50) {
-              return "Product name must be under 50 characters.";
-            }
-            return true;
+      const { productId, productName, quantity, unitPrice } =
+        await inquirer.prompt([
+          {
+            name: "productId",
+            type: "input",
+            message: "Enter product ID (must match existing inventory item):",
+            validate: (value: string) =>
+              value.trim().length > 0 || "Product ID is required.",
           },
-        },
-        {
-          name: "quantity",
-          type: "number",
-          message: "Enter quantity:",
-          validate: (value) => (value ?? 0) > 0 || "Must be greater than 0",
-        },
-        {
-          name: "unitPrice",
-          type: "number",
-          message: "Enter unit price:",
-          validate: (value) => (value ?? 0) > 0 || "Must be greater than 0",
-        },
-      ]);
+          {
+            name: "productName",
+            type: "input",
+            message: "Enter product name:",
+            validate: (value: string) => {
+              if (!value || value.trim().length === 0) {
+                return "Please enter a product name.";
+              }
+              if (value.trim().length < 2) {
+                return "Product name must be at least 2 characters.";
+              }
+              if (value.length > 50) {
+                return "Product name must be under 50 characters.";
+              }
+              return true;
+            },
+          },
+          {
+            name: "quantity",
+            type: "number",
+            message: "Enter quantity:",
+            validate: (value) => (value ?? 0) > 0 || "Must be greater than 0",
+          },
+          {
+            name: "unitPrice",
+            type: "number",
+            message: "Enter unit price:",
+            validate: (value) => (value ?? 0) > 0 || "Must be greater than 0",
+          },
+        ]);
 
-      items.push(
-        new PurchaseItem(productName, productName, quantity, unitPrice)
-      );
+      items.push(new PurchaseItem(productId, productName, unitPrice, quantity));
 
       const { confirm } = await inquirer.prompt({
         name: "confirm",
@@ -150,7 +161,7 @@ export class PurchaseOrderHandler {
       type: "list",
       message: "Select an order:",
       choices: orders.map((order) => ({
-        name: order.getOrderSummary(),
+        name: `ID: ${order.id} | Status: ${order.status}`,
         value: order.id,
       })),
     });
@@ -163,7 +174,24 @@ export class PurchaseOrderHandler {
     });
 
     try {
-      this.purchaseOrderService.updateOrderStatus(selectedId, newStatus);
+      const order = this.purchaseOrderService.getOrderById(selectedId);
+
+      if (!order) {
+        console.log("❌ Order not found.");
+        return;
+      }
+
+      order.updateStatus(newStatus);
+
+      if (newStatus === "Delivered") {
+        try {
+          order.applyToInventory(this.inventoryService.getInventoryMap());
+          console.log("✅ Inventory successfully updated.");
+        } catch (err) {
+          console.log(`⚠️ Inventory update warning: ${(err as Error).message}`);
+        }
+      }
+
       console.log("✅ Order status updated successfully.");
     } catch (error) {
       console.log("❌ " + (error as Error).message);

@@ -1,10 +1,12 @@
 import { PurchaseItem } from "../PurchaseItem";
+import { InventoryItem } from "../InventoryItem";
 
 export type OrderStatus = "Pending" | "Shipped" | "Delivered";
 
 export class PurchaseOrder {
   public shippedAt: Date | null = null;
   public deliveredAt: Date | null = null;
+  private inventoryUpdated = false;
 
   constructor(
     public readonly id: string,
@@ -24,6 +26,28 @@ export class PurchaseOrder {
     this.shippedAt = newStatus === "Shipped" ? new Date() : this.shippedAt;
     this.deliveredAt =
       newStatus === "Delivered" ? new Date() : this.deliveredAt;
+  }
+
+  public applyToInventory(inventoryMap: Map<string, InventoryItem>): void {
+    if (this.status !== "Delivered") {
+      throw new Error("Order must be delivered before updating inventory");
+    }
+
+    if (this.inventoryUpdated) {
+      throw new Error("Inventory already updated for this order");
+    }
+
+    this.items.forEach((item) => {
+      const inventoryItem = inventoryMap.get(item.productId);
+      if (!inventoryItem) {
+        throw new Error(
+          `No inventory item found for product ID: ${item.productId}`
+        );
+      }
+      inventoryItem.increaseStock(item.quantity);
+    });
+
+    this.inventoryUpdated = true;
   }
 
   public getOrderSummary(): string {

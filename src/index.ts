@@ -1,14 +1,27 @@
 import inquirer from "inquirer";
 
-import { SupplierHandler, PurchaseOrderHandler, ExitHandler } from "./handlers";
-import { SupplierService, PurchaseOrderService } from "./services";
+import {
+  SupplierHandler,
+  PurchaseOrderHandler,
+  InventoryHandler,
+  ExitHandler,
+} from "./handlers";
+import {
+  SupplierService,
+  PurchaseOrderService,
+  InventoryService,
+} from "./services";
 
 const supplierService = new SupplierService();
 const purchaseOrderService = new PurchaseOrderService();
+const inventoryService = new InventoryService();
+
 const supplierHandler = new SupplierHandler(supplierService);
+const inventoryHandler = new InventoryHandler(inventoryService);
 const purchaseHandler = new PurchaseOrderHandler(
   purchaseOrderService,
-  supplierService
+  supplierService,
+  inventoryService
 );
 const exitHandler = new ExitHandler();
 
@@ -21,6 +34,7 @@ const App = async () => {
     choices: [
       { name: "🚚 Manage Suppliers", value: "manageSuppliers" },
       { name: "💳 Manage Purchase Orders", value: "managePurchaseOrders" },
+      { name: "📊 Manage Inventory", value: "manageInventory" },
       { name: "🚪 Exit", value: "exit" },
     ],
   });
@@ -32,6 +46,10 @@ const App = async () => {
 
     case "managePurchaseOrders":
       await purchaseHandler.showPurchaseOrderMenu();
+      return App();
+
+    case "manageInventory":
+      await inventoryHandler.showInventoryMenu();
       return App();
 
     case "exit":

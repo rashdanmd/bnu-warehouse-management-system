@@ -94,5 +94,3 @@ const App = async () => {
 };
 
 App();
-
-console.log("Supplier Management System App is running");

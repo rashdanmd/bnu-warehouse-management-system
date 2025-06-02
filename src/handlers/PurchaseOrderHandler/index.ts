@@ -11,7 +11,8 @@ export class PurchaseOrderHandler {
   public async showPurchaseOrderMenu(): Promise<void> {
     const choices = [
       "📋 View all Purchase Orders",
-      "✍🏻 Create Purchase Order",
+      "🛒 Create Purchase Order",
+      "🚚 Update Order Status",
       "🔙 Go Back",
     ];
 
@@ -27,8 +28,12 @@ export class PurchaseOrderHandler {
         this.displayAllOrders();
         break;
 
-      case "✍🏻 Create Purchase Order":
+      case "🛒 Create Purchase Order":
         await this.handleCreateOrder();
+        break;
+
+      case "🚚 Update Order Status":
+        await this.updateOrderStatus();
         break;
 
       case "🔙 Go Back":
@@ -115,11 +120,42 @@ export class PurchaseOrderHandler {
     const order = new PurchaseOrder(`PO-${Date.now()}`, supplierId, items);
     this.purchaseOrderService.createOrder(order);
 
-    // Maintain supplier’s local order history
     const supplier = this.supplierService.getSupplierById(supplierId);
     supplier?.addOrder(order);
 
     console.log("✅ Purchase order created successfully!");
     console.log(order.getOrderSummary());
+  }
+
+  private async updateOrderStatus(): Promise<void> {
+    const orders = this.purchaseOrderService.getAllOrders();
+    if (orders.length === 0) {
+      console.log("❌ No orders to update.");
+      return;
+    }
+
+    const { selectedId } = await inquirer.prompt({
+      name: "selectedId",
+      type: "list",
+      message: "Select an order:",
+      choices: orders.map((order) => ({
+        name: order.getOrderSummary(),
+        value: order.id,
+      })),
+    });
+
+    const { newStatus } = await inquirer.prompt({
+      name: "newStatus",
+      type: "list",
+      message: "Select new status:",
+      choices: ["Pending", "Shipped", "Delivered"],
+    });
+
+    try {
+      this.purchaseOrderService.updateOrderStatus(selectedId, newStatus);
+      console.log("✅ Order status updated successfully.");
+    } catch (error) {
+      console.log("❌ " + (error as Error).message);
+    }
   }
 }

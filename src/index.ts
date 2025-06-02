@@ -15,13 +15,15 @@ import {
   CustomerOrderService,
   FinanceService,
 } from "./services";
-import { b } from "vitest/dist/chunks/suite.d.FvehnV49";
 
 const supplierService = new SupplierService();
-const purchaseOrderService = new PurchaseOrderService();
 const inventoryService = new InventoryService();
-const customerOrderService = new CustomerOrderService(inventoryService);
 const financeService = new FinanceService();
+const purchaseOrderService = new PurchaseOrderService(financeService);
+const customerOrderService = new CustomerOrderService(
+  inventoryService,
+  financeService
+);
 
 const supplierHandler = new SupplierHandler(supplierService);
 const inventoryHandler = new InventoryHandler(inventoryService);
@@ -29,7 +31,8 @@ const financeHandler = new FinanceHandler(financeService);
 const purchaseHandler = new PurchaseOrderHandler(
   purchaseOrderService,
   supplierService,
-  inventoryService
+  inventoryService,
+  financeService
 );
 const customerOrderHandler = new CustomerOrderHandler(
   customerOrderService,
@@ -70,13 +73,13 @@ const App = async () => {
       await customerOrderHandler.showCustomerOrderMenu();
       return App();
 
+    case "finance":
+      await financeHandler.showFinanceMenu();
+      return App();
+
     case "exit":
       const confirmed = await exitHandler.confirmExit();
       if (!confirmed) return App();
-      break;
-
-    case "finance":
-      await financeHandler.showFinanceMenu();
       break;
 
     default:

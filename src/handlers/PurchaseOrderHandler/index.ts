@@ -4,13 +4,15 @@ import {
   SupplierService,
   PurchaseOrderService,
   InventoryService,
+  FinanceService,
 } from "../../services";
 
 export class PurchaseOrderHandler {
   constructor(
     private purchaseOrderService: PurchaseOrderService,
     private supplierService: SupplierService,
-    private inventoryService: InventoryService
+    private inventoryService: InventoryService,
+    private financeService: FinanceService
   ) {}
 
   public async showPurchaseOrderMenu(): Promise<void> {
@@ -186,9 +188,16 @@ export class PurchaseOrderHandler {
       if (newStatus === "Delivered") {
         try {
           order.applyToInventory(this.inventoryService.getInventoryMap());
+
+          this.financeService.logTransaction(
+            "SupplierPayment",
+            order.getCostOfTotalOrder(),
+            `Supplier order: ${order.id}`
+          );
+
           console.log("✅ Inventory successfully updated.");
         } catch (err) {
-          console.log(`⚠️ Inventory update warning: ${(err as Error).message}`);
+          console.log(`❌ Inventory update warning: ${(err as Error).message}`);
         }
       }
 

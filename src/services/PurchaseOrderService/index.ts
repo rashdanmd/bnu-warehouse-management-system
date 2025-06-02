@@ -1,8 +1,10 @@
-import { PurchaseOrder, OrderStatus } from "../../models/PurchaseOrder";
-import { PurchaseItem } from "../../models/PurchaseItem";
+import { PurchaseOrder, OrderStatus, PurchaseItem } from "../../models";
+import { FinanceService } from "../FinanceService";
 
 export class PurchaseOrderService {
   private orders: PurchaseOrder[] = [];
+
+  constructor(private financeService: FinanceService) {}
 
   public createOrder(supplierId: string, items: PurchaseItem[]): PurchaseOrder {
     const order = new PurchaseOrder(`PO-${Date.now()}`, supplierId, items);
@@ -25,6 +27,17 @@ export class PurchaseOrderService {
   public updateOrderStatus(id: string, newStatus: OrderStatus): void {
     const order = this.getOrderById(id);
     if (!order) throw new Error("Order not found");
+
+    const wasDelivered = order.status === "Delivered";
+
     order.updateStatus(newStatus);
+
+    if (newStatus === "Delivered" && !wasDelivered) {
+      this.financeService.logTransaction(
+        "SupplierPayment",
+        order.getCostOfTotalOrder(),
+        `Supplier order: ${order.id}`
+      );
+    }
   }
 }

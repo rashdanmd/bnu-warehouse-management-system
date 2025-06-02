@@ -1,10 +1,13 @@
 import { CustomerOrder } from "../../models/CustomerOrder";
-import { InventoryService } from "../InventoryService";
+import { InventoryService, FinanceService } from "../../services";
 
 export class CustomerOrderService {
   private customerOrders: CustomerOrder[] = [];
 
-  constructor(private inventoryService: InventoryService) {}
+  constructor(
+    private inventoryService: InventoryService,
+    private financeService: FinanceService
+  ) {}
 
   public createOrder(
     customerName: string,
@@ -34,5 +37,11 @@ export class CustomerOrderService {
 
     const inventoryMap = this.inventoryService.getInventoryMap();
     order.fulfillOrder(inventoryMap);
+
+    this.financeService.logTransaction(
+      "CustomerPayment",
+      order.getTotalCost(),
+      `Customer order: ${order.id}`
+    );
   }
 }

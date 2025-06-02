@@ -4,23 +4,30 @@ import {
   SupplierHandler,
   PurchaseOrderHandler,
   InventoryHandler,
+  CustomerOrderHandler,
   ExitHandler,
 } from "./handlers";
 import {
   SupplierService,
   PurchaseOrderService,
   InventoryService,
+  CustomerOrderService,
 } from "./services";
 
 const supplierService = new SupplierService();
 const purchaseOrderService = new PurchaseOrderService();
 const inventoryService = new InventoryService();
+const customerOrderService = new CustomerOrderService(inventoryService);
 
 const supplierHandler = new SupplierHandler(supplierService);
 const inventoryHandler = new InventoryHandler(inventoryService);
 const purchaseHandler = new PurchaseOrderHandler(
   purchaseOrderService,
   supplierService,
+  inventoryService
+);
+const customerOrderHandler = new CustomerOrderHandler(
+  customerOrderService,
   inventoryService
 );
 const exitHandler = new ExitHandler();
@@ -35,6 +42,7 @@ const App = async () => {
       { name: "🚚 Manage Suppliers", value: "manageSuppliers" },
       { name: "💳 Manage Purchase Orders", value: "managePurchaseOrders" },
       { name: "📊 Manage Inventory", value: "manageInventory" },
+      { name: "🧾 Manage Customer Orders", value: "manageCustomerOrders" },
       { name: "🚪 Exit", value: "exit" },
     ],
   });
@@ -50,6 +58,10 @@ const App = async () => {
 
     case "manageInventory":
       await inventoryHandler.showInventoryMenu();
+      return App();
+
+    case "manageCustomerOrders":
+      await customerOrderHandler.showCustomerOrderMenu();
       return App();
 
     case "exit":

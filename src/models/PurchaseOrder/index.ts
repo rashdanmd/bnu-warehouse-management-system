@@ -15,7 +15,7 @@ export class PurchaseOrder {
     return this.items.reduce((total, item) => total + item.getTotalPrice(), 0);
   }
 
-  public updtateStatus(newStatus: OrderStatus): void {
+  public updateStatus(newStatus: OrderStatus): void {
     this.status = newStatus;
   }
 

@@ -18,10 +18,10 @@ describe("PurchaseOrder", () => {
     const items = [new PurchaseItem("ID-3", "item1", 1, 10)];
     const order = new PurchaseOrder("order1", "supplier1", items);
 
-    order.updtateStatus("Shipped");
+    order.updateStatus("Shipped");
     expect(order.status).toBe("Shipped");
 
-    order.updtateStatus("Delivered");
+    order.updateStatus("Delivered");
     expect(order.status).toBe("Delivered");
   });
 

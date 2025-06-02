@@ -1,4 +1,8 @@
+import { PurchaseOrder } from "@models/PurchaseOrder";
+
 export class Supplier {
+  public readonly purchaseOrders: PurchaseOrder[] = [];
+
   constructor(
     public id: string,
     public name: string,
@@ -19,6 +23,14 @@ export class Supplier {
       throw new Error("Not a valid email address");
 
     this.contactEmail = newEmail;
+  }
+
+  public addOrder(order: PurchaseOrder): void {
+    this.purchaseOrders.push(order);
+  }
+
+  public getOrderSummaries(): string[] {
+    return this.purchaseOrders.map((order) => order.getOrderSummary());
   }
 
   public static isValidEmail(email: string): boolean {

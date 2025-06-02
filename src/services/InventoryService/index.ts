@@ -3,10 +3,6 @@ import { InventoryItem } from "../../models/InventoryItem/index";
 export class InventoryService {
   private inventoryMap = new Map<string, InventoryItem>();
 
-  /**
-   * Adds a new item to the inventory.
-   * If the item already exists, it throws an error.
-   */
   public addNewItem(item: InventoryItem): void {
     if (this.inventoryMap.has(item.id)) {
       throw new Error(`Item with ID ${item.id} already exists.`);
@@ -14,9 +10,6 @@ export class InventoryService {
     this.inventoryMap.set(item.id, item);
   }
 
-  /**
-   * Increases stock for an existing inventory item.
-   */
   public receiveStock(productId: string, quantity: number): void {
     const item = this.inventoryMap.get(productId);
     if (!item) {
@@ -25,9 +18,6 @@ export class InventoryService {
     item.increaseStock(quantity);
   }
 
-  /**
-   * Decreases stock for an existing inventory item (e.g., on customer sale).
-   */
   public reduceStock(productId: string, quantity: number): void {
     const item = this.inventoryMap.get(productId);
     if (!item) {

@@ -10,10 +10,10 @@ export class PurchaseOrderHandler {
 
   public async showPurchaseOrderMenu(): Promise<void> {
     const choices = [
-      "📋 View all Purchase Orders",
-      "🛒 Create Purchase Order",
-      "🚚 Update Order Status",
-      "🔙 Go Back",
+      { name: "📋 View all Purchase Orders", value: "viewOrders" },
+      { name: "🛒 Create Purchase Order", value: "createOrder" },
+      { name: "🚚 Update Order Status", value: "updateStatus" },
+      { name: "🔙 Go Back", value: "goBack" },
     ];
 
     const { action } = await inquirer.prompt({
@@ -24,19 +24,19 @@ export class PurchaseOrderHandler {
     });
 
     switch (action) {
-      case "📋 View all Purchase Orders":
+      case "viewOrders":
         this.displayAllOrders();
         break;
 
-      case "🛒 Create Purchase Order":
+      case "createOrder":
         await this.handleCreateOrder();
         break;
 
-      case "🚚 Update Order Status":
+      case "updateStatus":
         await this.updateOrderStatus();
         break;
 
-      case "🔙 Go Back":
+      case "goBack":
         return;
     }
 
@@ -74,21 +74,33 @@ export class PurchaseOrderHandler {
       name: "supplierId",
       type: "list",
       message: "Select a supplier:",
-      choices: suppliers.map((s) => ({
-        name: `${s.name} (${s.id})`,
-        value: s.id,
+      choices: suppliers.map((supplier) => ({
+        name: `${supplier.name} (${supplier.id})`,
+        value: supplier.id,
       })),
     });
 
     const items: PurchaseItem[] = [];
-
     let addMore = true;
+
     while (addMore) {
       const { productName, quantity, unitPrice } = await inquirer.prompt([
         {
           name: "productName",
           type: "input",
           message: "Enter product name:",
+          validate: (value: string) => {
+            if (!value || value.trim().length === 0) {
+              return "Please enter a product name.";
+            }
+            if (value.trim().length < 2) {
+              return "Product name must be at least 2 characters.";
+            }
+            if (value.length > 50) {
+              return "Product name must be under 50 characters.";
+            }
+            return true;
+          },
         },
         {
           name: "quantity",
@@ -117,8 +129,7 @@ export class PurchaseOrderHandler {
       addMore = confirm;
     }
 
-    const order = new PurchaseOrder(`PO-${Date.now()}`, supplierId, items);
-    this.purchaseOrderService.createOrder(order);
+    const order = this.purchaseOrderService.createOrder(supplierId, items);
 
     const supplier = this.supplierService.getSupplierById(supplierId);
     supplier?.addOrder(order);

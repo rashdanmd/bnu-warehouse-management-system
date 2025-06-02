@@ -27,19 +27,36 @@ export class PurchaseOrder {
   }
 
   public getOrderSummary(): string {
-    let summary = `Order ID: ${this.id}
-    Supplier: ${this.supplierId}
-    Status: ${this.status}
-    Total: £${this.getCostOfTotalOrder().toFixed(2)}`;
+    const itemLines = this.items
+      .map((item, index) => {
+        return `  ${index + 1}. ${item.productName}\n     Quantity: ${item.quantity}\n     Unit Price: £${item.unitPrice.toFixed(2)}\n     Total: £${item.getTotalPrice().toFixed(2)}`;
+      })
+      .join("\n\n");
+
+    let summary = `
+  ══════════════════════════════════════════════════════
+                       PURCHASE ORDER
+  ══════════════════════════════════════════════════════
+  Order ID    : ${this.id}
+  Supplier ID : ${this.supplierId}
+  Status      : ${this.status}
+  Order Date  : ${this.orderDate.toLocaleDateString()}
+  
+  🧾 Items Ordered:
+  ${itemLines}
+  
+  💰 Total Cost: £${this.getCostOfTotalOrder().toFixed(2)}
+  ══════════════════════════════════════════════════════
+  `;
 
     if (this.shippedAt) {
-      summary += `\nShipped At: ${this.shippedAt.toLocaleString()}`;
+      summary += `Shipped At   : ${this.shippedAt.toLocaleString()}\n`;
     }
 
     if (this.deliveredAt) {
-      summary += `\nDelivered At: ${this.deliveredAt.toLocaleString()}`;
+      summary += `Delivered At : ${this.deliveredAt.toLocaleString()}\n`;
     }
 
-    return summary;
+    return summary.trim();
   }
 }

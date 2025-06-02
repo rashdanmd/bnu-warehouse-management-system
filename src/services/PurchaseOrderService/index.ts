@@ -1,10 +1,13 @@
 import { PurchaseOrder, OrderStatus } from "../../models/PurchaseOrder";
+import { PurchaseItem } from "../../models/PurchaseItem";
 
 export class PurchaseOrderService {
   private orders: PurchaseOrder[] = [];
 
-  public createOrder(order: PurchaseOrder): void {
+  public createOrder(supplierId: string, items: PurchaseItem[]): PurchaseOrder {
+    const order = new PurchaseOrder(`PO-${Date.now()}`, supplierId, items);
     this.orders.push(order);
+    return order;
   }
 
   public getOrdersBySupplier(supplierId: string): PurchaseOrder[] {
@@ -22,7 +25,6 @@ export class PurchaseOrderService {
   public updateOrderStatus(id: string, newStatus: OrderStatus): void {
     const order = this.getOrderById(id);
     if (!order) throw new Error("Order not found");
-
     order.updateStatus(newStatus);
   }
 }

@@ -36,32 +36,20 @@ export class InventoryService {
     item.decreaseStock(quantity);
   }
 
-  /**
-   * Returns all items below their reorder level.
-   */
   public getLowStockItems(): InventoryItem[] {
     return Array.from(this.inventoryMap.values()).filter((item) =>
       item.isLowStock()
     );
   }
 
-  /**
-   * Gets an item by ID.
-   */
   public getItem(productId: string): InventoryItem | undefined {
     return this.inventoryMap.get(productId);
   }
 
-  /**
-   * Returns the full inventory as an array.
-   */
   public listAllItems(): InventoryItem[] {
     return Array.from(this.inventoryMap.values());
   }
 
-  /**
-   * Provides the internal map for use with PurchaseOrder.applyToInventory().
-   */
   public getInventoryMap(): Map<string, InventoryItem> {
     return this.inventoryMap;
   }

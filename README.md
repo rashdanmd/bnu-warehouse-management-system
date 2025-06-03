@@ -8,7 +8,6 @@ A warehouse management system built with TypeScript
 
 - **TypeScript**
 - **Node.js**
-- **Express**
 - **ts-node**
 - **Vitest**
 - **Playwright**

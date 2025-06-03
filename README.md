@@ -37,8 +37,6 @@ npm install
 npm run dev
 ```
 
-> This starts the app using `ts-node`.
-
 ---
 
 ## 🧪 Running Unit Tests

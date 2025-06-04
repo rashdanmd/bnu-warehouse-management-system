@@ -47,8 +47,3 @@ npm run test:unit
 > This runs all unit tests using **Vitest**.
 
 ---
-
-## ✅ Requirements
-
-- Node.js 18+
-- npm 9+
